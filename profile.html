@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FLXCoin – Profil</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background-color: #0e0e0e;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: #1a1a1a;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    main {
+      padding: 40px 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .profile-section {
+      background: #1f1f1f;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .title {
+      font-size: 20px;
+      margin-top: 15px;
+      color: #00ff99;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+    li {
+      background: #2b2b2b;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      width: 80%;
+      max-width: 300px;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #00ff99;
+      color: black;
+      cursor: pointer;
+    }
+    #authForm {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>FLXCoin – Profil</header>
+  <main>
+    <section class="profile-section" id="authForm">
+      <h2>Přihlášení / Registrace</h2>
+      <input type="text" id="authUsername" placeholder="Uživatelské jméno" /><br />
+      <button onclick="register()">Registrovat</button>
+      <button onclick="login()">Přihlásit se</button>
+    </section>
+
+    <section class="profile-section" id="profileSection" style="display:none">
+      <h2>Uživatelský profil</h2>
+      <p><strong>Uživatel:</strong> <span id="username">Načítání...</span></p>
+      <p><strong>Stav účtu:</strong> <span id="balance">0</span> FLX</p>
+      <p class="title">🏆 Nejvyšší titul: <span id="topTitle">Žádný</span></p>
+    </section>
+
+    <section class="profile-section" id="titlesSection" style="display:none">
+      <h2>🎖 Získané tituly</h2>
+      <ul id="titlesList">
+        <li>Načítání...</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    const userId = localStorage.getItem("userId");
+
+    async function register() {
+      const username = document.getElementById("authUsername").value.trim();
+      if (!username) return alert("Zadej uživatelské jméno!");
+
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem("userId", data.userId);
+        location.reload();
+      } else {
+        alert(data.message || "Registrace selhala.");
+      }
+    }
+
+    async function login() {
+      const username = document.getElementById("authUsername").value.trim();
+      if (!username) return alert("Zadej uživatelské jméno!");
+
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem("userId", data.userId);
+        location.reload();
+      } else {
+        alert(data.message || "Přihlášení selhalo.");
+      }
+    }
+
+    async function loadProfile() {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        document.getElementById("authForm").style.display = "block";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/user-profile?user=${userId}`);
+        const data = await res.json();
+
+        if (!data || !data.username) {
+          localStorage.removeItem("userId");
+          location.reload();
+          return;
+        }
+
+        document.getElementById("authForm").style.display = "none";
+        document.getElementById("profileSection").style.display = "block";
+        document.getElementById("titlesSection").style.display = "block";
+
+        document.getElementById("username").textContent = data.username;
+        document.getElementById("balance").textContent = data.balance.toFixed(2);
+
+        const titles = data.titles || [];
+        const titlesList = document.getElementById("titlesList");
+        titlesList.innerHTML = "";
+
+        if (titles.length === 0) {
+          titlesList.innerHTML = "<li>Nemáš žádné tituly.</li>";
+          document.getElementById("topTitle").textContent = "Žádný";
+        } else {
+          let top = titles.reduce((a, b) => a.price > b.price ? a : b);
+          document.getElementById("topTitle").textContent = top.name;
+
+          titles.forEach(title => {
+            const li = document.createElement("li");
+            li.textContent = `${title.name} – ${title.price} FLX`;
+            titlesList.appendChild(li);
+          });
+        }
+      } catch (err) {
+        console.error("Chyba při načítání profilu:", err);
+      }
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

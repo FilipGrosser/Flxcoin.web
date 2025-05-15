@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FLXCoin – Transakce</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background-color: #0e0e0e;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: #1a1a1a;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    main {
+      padding: 40px 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      margin: 5px;
+      border: none;
+    }
+    input {
+      width: 200px;
+    }
+    button {
+      background-color: #00ff99;
+      color: #000;
+      cursor: pointer;
+    }
+    .transaction-list {
+      margin-top: 30px;
+      text-align: left;
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .transaction-list h3 {
+      margin-top: 0;
+    }
+    .transaction-item {
+      padding: 5px 0;
+      border-bottom: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <header>FLXCoin – Transakce</header>
+  <main>
+    <p>Váš zůstatek: <strong><span id="balance">0</span> FLX</strong></p>
+
+    <h2>Odeslat FLX</h2>
+    <input type="text" id="recipient" placeholder="ID příjemce">
+    <input type="number" id="amount" placeholder="Kolik FLX">
+    <button onclick="sendTransaction()">Odeslat</button>
+    <p id="status"></p>
+
+    <div class="transaction-list">
+      <h3>Historie transakcí</h3>
+      <div id="history"></div>
+    </div>
+  </main>
+
+  <script>
+    const userId = localStorage.getItem("userId");
+    const balanceEl = document.getElementById("balance");
+    const statusEl = document.getElementById("status");
+    const historyEl = document.getElementById("history");
+
+    if (!userId) {
+      document.body.innerHTML = "<p>Nejprve se prosím přihlas nebo registruj.</p>";
+    } else {
+      async function loadBalance() {
+        const res = await fetch(`/api/user-balance?user=${userId}`);
+        const data = await res.json();
+        balanceEl.textContent = data.balance || 0;
+      }
+
+      async function loadTransactions() {
+        const res = await fetch(`/api/transactions?user=${userId}`);
+        const data = await res.json();
+        historyEl.innerHTML = "";
+        if (data.transactions && data.transactions.length > 0) {
+          data.transactions.forEach(tx => {
+            const div = document.createElement("div");
+            div.className = "transaction-item";
+            div.textContent = `${tx.from === userId ? "➖" : "➕"} ${tx.amount} FLX ${tx.from === userId ? `→ ${tx.to}` : `od ${tx.from}`}`;
+            historyEl.appendChild(div);
+          });
+        } else {
+          historyEl.innerHTML = "<p>Žádné transakce zatím neproběhly.</p>";
+        }
+      }
+
+      async function sendTransaction() {
+        const recipient = document.getElementById("recipient").value.trim();
+        const amount = parseFloat(document.getElementById("amount").value);
+
+        if (!recipient || isNaN(amount) || amount <= 0) {
+          statusEl.textContent = "Zadej platný příjemce a částku.";
+          return;
+        }
+
+        const res = await fetch("/api/send-transaction", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ from: userId, to: recipient, amount })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          statusEl.textContent = "Transakce úspěšná!";
+          loadBalance();
+          loadTransactions();
+        } else {
+          statusEl.textContent = data.message || "Chyba při odesílání.";
+        }
+      }
+
+      loadBalance();
+      loadTransactions();
+    }
+  </script>
+</body>
+</html>

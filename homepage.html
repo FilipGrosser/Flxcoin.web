@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FLXCoin | Welcome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #0d0d0d;
+      color: #00ffe1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      padding: 10px 20px;
+      background-color: #1a1a1a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo img {
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    nav a {
+      color: #00ffe1;
+      margin-left: 15px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    main {
+      padding: 30px 20px;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .value-section {
+      margin-bottom: 30px;
+      background-color: #141414;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .chart-section {
+      background-color: #141414;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    #flxChart {
+      max-width: 100%;
+    }
+
+    .center-logo {
+      margin: 30px auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    .center-logo img {
+      height: 100px;
+    }
+
+    @media screen and (max-width: 600px) {
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+      }
+
+      .logo {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://via.placeholder.com/40x40.png?text=F" alt="FLX logo">
+      FLXCoin
+    </div>
+    <nav>
+      <a href="/mining.html">Mining</a>
+      <a href="/staking.html">Staking</a>
+      <a href="/games.html">Games</a>
+      <a href="/profile.html">Profile</a>
+      <a href="/redeem.html">Redeem</a>
+      <a href="/transactions.html">Transactions</a>
+      <a href="/shop.html">Shop</a>
+    </nav>
+  </header>
+
+  <div class="center-logo">
+    <img src="https://via.placeholder.com/100x100.png?text=FLX" alt="FLX Main Logo">
+  </div>
+
+  <main>
+    <h1>Welcome to FLXCoin!</h1>
+
+    <section class="value-section">
+      <h2>Current Value of 1 FLX</h2>
+      <p><strong><span id="flx-value">0.10</span> Kč</strong></p>
+      <p>USD: <span id="usd">0.0043</span> | GBP: <span id="gbp">0.0037</span></p>
+    </section>
+
+    <section class="chart-section">
+      <h2>Value History</h2>
+      <canvas id="flxChart"></canvas>
+    </section>
+  </main>
+
+  <script>
+    const flxValue = 0.10;
+    document.getElementById("flx-value").innerText = flxValue.toFixed(2);
+    document.getElementById("usd").innerText = (flxValue * 0.043).toFixed(4);
+    document.getElementById("gbp").innerText = (flxValue * 0.037).toFixed(4);
+
+    const ctx = document.getElementById('flxChart').getContext('2d');
+    const flxChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Start', 'Týden 1', 'Týden 2', 'Dnes'],
+        datasets: [{
+          label: 'FLX Value (Kč)',
+          data: [0.10, 0.20, 0.20, 0.40],
+          borderColor: '#00ffe1',
+          fill: false,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

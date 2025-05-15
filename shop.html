@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FLXCoin Shop & Redeem</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background: #1f1f1f;
+    }
+    tr:nth-child(even) {
+      background: #1a1a1a;
+    }
+    button.buy-btn {
+      padding: 8px 14px;
+      background-color: #00b894;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    button.buy-btn:hover {
+      background-color: #019874;
+    }
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #1f1f1f;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+    button.redeem-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #00b894;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button.redeem-btn:hover {
+      background-color: #019874;
+    }
+    .info {
+      max-width: 400px;
+      margin: 15px auto;
+      background: #2d2d2d;
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>FLXCoin Shop</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Název titulu</th>
+        <th>Cena (FLX)</th>
+        <th>Popis</th>
+        <th>Bonus / Efekt</th>
+        <th>Koupit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-type="title" data-name="Začátečník" data-price="1000">
+        <td>Začátečník</td>
+        <td>1000</td>
+        <td>První titul pro nováčky</td>
+        <td>Žádný bonus</td>
+        <td><button class="buy-btn">Koupit</button></td>
+      </tr>
+      <tr data-type="title" data-name="Těžič" data-price="5000">
+        <td>Těžič</td>
+        <td>5000</td>
+        <td>Odborník na těžbu</td>
+        <td>+5% k mining výtěžku</td>
+        <td><button class="buy-btn">Koupit</button></td>
+      </tr>
+      <tr data-type="title" data-name="Obchodník" data-price="10000">
+        <td>Obchodník</td>
+        <td>10000</td>
+        <td>Skvělý obchodník</td>
+        <td>-2% poplatek u transakcí</td>
+        <td><button class="buy-btn">Koupit</button></td>
+      </tr>
+      <tr data-type="title" data-name="Investor" data-price="25000">
+        <td>Investor</td>
+        <td>25000</td>
+        <td>Šikovný investor</td>
+        <td>+10% k staking odměnám</td>
+        <td><button class="buy-btn">Koupit</button></td>
+      </tr>
+      <tr data-type="title" data-name="Král FLX" data-price="50000">
+        <td>Král FLX</td>
+        <td>50000</td>
+        <td>Nejvyšší titul</td>
+        <td>+15% ke všem výnosům</td>
+        <td><button class="buy-btn">Koupit</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h1>Redeem Kód</h1>
+  <form id="redeemForm" autocomplete="off">
+    <input type="text" id="redeemCode" placeholder="Zadej redeem kód" required />
+    <button type="submit" class="redeem-btn">Uplatnit kód</button>
+  </form>
+  
+  <div class="info" id="redeemMessage"></div>
+
+  <script>
+    // Demo uživatel - má 100000 FLX, může si koupit tituly
+    let userFlx = 100000;
+    let userTitles = [];
+
+    function showMessage(text, color = "#00b894") {
+      const msg = document.getElementById('redeemMessage');
+      msg.textContent = text;
+      msg.style.color = color;
+    }
+
+    // Nakupování titulů
+    document.querySelectorAll('.buy-btn').forEach(button => {
+      button.addEventListener('click', e => {
+        const row = e.target.closest('tr');
+        const price = parseInt(row.getAttribute('data-price'));
+        const titleName = row.getAttribute('data-name');
+
+        if (userFlx < price) {
+          showMessage("Nemáš dostatek FLX na koupi tohoto titulu.", "red");
+          return;
+        }
+
+        if (userTitles.includes(titleName)) {
+          showMessage("Tento titul už vlastníš.", "orange");
+          return;
+        }
+
+        userFlx -= price;
+        userTitles.push(titleName);
+        showMessage(`Zakoupil(a) jsi titul "${titleName}". Zbývá ti ${userFlx} FLX.`);
+      });
+    });
+
+    // Statické redeem kódy pro demo účely
+    const redeemCodes = {
+      "WELCOME10": { type: "flx", amount: 1000, used: false },
+      "MINER50": { type: "flx", amount: 5000, used: true },
+      "TITLEKING": { type: "title", title: "Král FLX", used: false },
+      "LUCKY100": { type: "flx", amount: 10000, used: false },
+      "STAKEBOOST": { type: "flx", amount: 25000, used: false }
+    };
+
+    const form = document.getElementById('redeemForm');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const code = document.getElementById('redeemCode').value.trim().toUpperCase();
+
+      if (!redeemCodes.hasOwnProperty(code)) {
+        showMessage("Neplatný kód.", "red");
+        return;
+      }
+
+      if (redeemCodes[code].used) {
+        showMessage("Tento kód byl již použit.", "red");
+        return;
+      }
+
+      if (redeemCodes[code].type === "flx") {
+        userFlx += redeemCodes[code].amount;
+        showMessage(`Gratulujeme! Získal(a) jste ${redeemCodes[code].amount} FLX. Máš nyní ${userFlx} FLX.`);
+      } else if (redeemCodes[code].type === "title") {
+        const title = redeemCodes[code].title;
+        if (userTitles.includes(title)) {
+          showMessage(`Titul "${title}" už vlastníš.`, "orange");
+        } else {
+          userTitles.push(title);
+          showMessage(`Gratulujeme! Získal(a) jste titul: ${title}.`);
+        }
+      }
+
+      redeemCodes[code].used = true;
+    });
+  </script>
+
+</body>
+</html>
